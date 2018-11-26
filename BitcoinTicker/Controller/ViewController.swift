@@ -14,6 +14,8 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     
     let baseURL = "https://apiv2.bitcoinaverage.com/indices/global/ticker/BTC"
     let currencyArray = ["AUD", "BRL","CAD","CNY","EUR","GBP","HKD","IDR","ILS","INR","JPY","MXN","NOK","NZD","PLN","RON","RUB","SEK","SGD","USD","ZAR"]
+    let currencySymbolArray = ["$", "R$", "$", "¥", "€", "£", "$", "Rp", "₪", "₹", "¥", "$", "kr", "$", "zł", "lei", "₽", "kr", "$", "$", "R"]
+    var currencySelected = ""
     var finalURL = ""
 
     //Pre-setup IBOutlets
@@ -44,6 +46,7 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     func pickerView(_ pickerView: UIPickerView, didSelectRow row: Int, inComponent component: Int) {
         finalURL = baseURL + currencyArray[row]
         print(finalURL)
+        currencySelected = currencySymbolArray[row]
         getBitcoinrData(url: finalURL)
     }
     
@@ -51,16 +54,13 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     /***************************************************************/
     
     func getBitcoinrData(url: String) {
-        
+   
         Alamofire.request(url, method: .get)
             .responseJSON { response in
                 if response.result.isSuccess {
-
-                    print("Sucess! Got the weather data")
+                    print("Sucess! Got the Bitcoin data")
                     let bitcoinJSON : JSON = JSON(response.result.value!)
-
                     self.updateBitcoinData(json: bitcoinJSON)
-
                 } else {
                     print("Error: \(String(describing: response.result.error))")
                     self.bitcoinPriceLabel.text = "Connection Issues"
@@ -74,12 +74,11 @@ class ViewController: UIViewController, UIPickerViewDelegate, UIPickerViewDataSo
     
     func updateBitcoinData(json : JSON) {
         
-        if let tempResult = json["open"]["hour"].double {
-            bitcoinPriceLabel.text = String(tempResult)
+        if let bitcoinResult = json["ask"].double {
+            bitcoinPriceLabel.text = currencySelected + " " + String(bitcoinResult)
         } else {
-            self.bitcoinPriceLabel.text = "No Data Found"
+            self.bitcoinPriceLabel.text = "Price Unavailable"
         }
-        
     }
 
 }
